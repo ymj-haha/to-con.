@@ -665,6 +665,9 @@ document.addEventListener('click', function() {
             if (savedBackground) {
                 document.getElementById('background-container').style.backgroundImage = `url(${savedBackground})`;
             }
+            else {
+        document.getElementById('background-container').style.backgroundImage = "url('./背景.png')";
+    }
             
            // 加载保存的信封图片
 const savedEnvelopeImage = localStorage.getItem('envelopeImage');
