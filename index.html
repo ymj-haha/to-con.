@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>???????</title>
+    <style>
+        :root {
+            --primary-green: #71aa34;
+            --secondary-green: #4b7923;
+            --light-brown: #b08d57;
+            --dark-brown: #6d4c2c;
+            --background-color: #e9dcc9;
+            --text-color: #333;
+            --card-bg: #f7f3e8;
+            --music-control: #888888;
+            --envelope-bg: #f7f3e8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景图片容器 */
+        #background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: rgba(241, 194, 123, 0.8);
+            border: 3px solid var(--dark-brown);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 2px 2px 0 var(--dark-brown);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* 开场动画样式 */
+        #opening-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .animation-content {
+            text-align: center;
+            color: white;
+        }
+
+        .pixel-star {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        .start-button {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            border: 2px solid var(--secondary-green);
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .start-button:hover {
+            background-color: var(--secondary-green);
+            transform: scale(1.05);
+        }
+
+        /* 信封样式 - 修改为弹出效果 */
+        .envelope-container {
+            position: relative;
+            width: 263px;
+            height: 300px;
+            margin: 0 auto 50px;
+            z-index: 10;
+        }
+
+        .envelope {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-front, .envelope-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border: 5px solid var(--light-brown);
+            background-color: var(--envelope-bg);
+            backface-visibility: hidden;
+        }
+
+        .envelope-front {
+            z-index: 2;
+            transform: scale(1);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .envelope-back {
+            z-index: 1;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .envelope.open .envelope-front {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .envelope.open .envelope-back {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .envelope-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--dark-brown);
+        }
+
+        .envelope-text {
+            color: var(--dark-brown);
+            font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .envelope-content {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* 图片弹出层样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border: 5px solid var(--light-brown);
+            border-radius: 10px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--primary-green);
+        }
+
+        /* 音乐播放器样式 - 左上角灰色 */
+        .music-player {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 90;
+        }
+
+        .music-toggle {
+            width: 40px;
+            height: 40px;
+            background-color: var(--music-control);
+            border: 2px solid #cccccc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .music-toggle:hover {
+            transform: scale(1.1);
+            background-color: #aaaaaa;
+        }
+
+        .music-icon {
+            color: rgb(255, 255, 255);
+            font-size: 20px;
+        }
+
+        .instructions {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 2px solid var(--light-brown);
+        }
+
+        .instructions h2 {
+            color: var(--secondary-green);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .stardew-button {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            border: 2px solid var(--secondary-green);
+            text-shadow: 1px 1px 0 var(--dark-brown);
+            transition: all 0.3s;
+        }
+
+        .stardew-button:hover {
+            background-color: var(--secondary-green);
+            transform: translateY(-2px);
+        }
+
+        .stardew-input {
+            padding: 10px;
+            border: 2px solid var(--light-brown);
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            font-family: 'Courier New', monospace;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--dark-brown);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .envelope-container {
+                width: 250px;
+                height: 166px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .envelope-img {
+            max-width: 80%;
+            height: auto;
+            border-radius: 5px;
+            object-fit: contain;
+        }
+
+        /* 其他样式 */
+        .upload-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px solid var(--light-brown);
+            display: none; /* 初始隐藏 */
+        }
+
+        .instructions {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 2px solid var(--light-brown);
+        }
+
+        .stardew-button {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            border: 2px solid var(--secondary-green);
+            text-shadow: 1px 1px 0 var(--dark-brown);
+            transition: all 0.3s;
+        }
+
+        .stardew-button:hover {
+            background-color: var(--secondary-green);
+            transform: translateY(-2px);
+        }
+
+        .stardew-input {
+            padding: 10px;
+            border: 2px solid var(--light-brown);
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            font-family: 'Courier New', monospace;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--dark-brown);
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .envelope-container {
+                width: 250px;
+                height: 166px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* 信封装饰元素 */
+        .stamp {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff6b6b, #c0392b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            transform: rotate(15deg);
+            border: 2px dashed white;
+        }
+        
+        .seal {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #8e44ad, #6c3483);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 8px;
+            border: 2px solid #5b2c6f;
+        }
+        
+        /* 关闭按钮 */
+        .close-envelope {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--light-brown);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 11;
+        }
+        
+        .envelope.open ~ .close-envelope {
+            opacity: 1;
+        }
+
+     
+
+        /* 信封内容图片样式 */
+        .envelope-content-image {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 2px solid var(--light-brown);
+            transition: transform 0.3s;
+        }
+
+        .envelope-content-image:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+   
+    <!-- 开场动画 -->
+    <div id="opening-animation">
+        <div class="animation-content">
+            <div class="pixel-star">⭐</div>
+            <h2>0-100%</h2>
+            <p>Loading......</p>
+            <button class="start-button" id="start-button">开启</button>
+        </div>
+    </div>
+
+    <!-- 背景图片容器 -->
+    <div id="background-container"></div>
+    
+    <!-- 音乐播放器 -->
+    <div class="music-player">
+        <div class="music-toggle" id="music-toggle">
+            <div class="music-icon">♪</div>
+        </div>
+        <audio id="background-music" loop>
+            <!-- 插入点3: 背景音乐 -->
+            <!-- 将下面的src=""替换为您的音乐文件路径 -->
+            <source src="fun festival.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>From Stardew Valley</h1>
+            <p>balabalabala</p>
+        </header>
+        
+        <div class="envelope-container">
+            <div class="envelope" id="envelope">
+                <div class="envelope-front">
+                    <div class="envelope-icon">
+                        <!-- 信封图片将在这里显示 -->
+                        <img src="封界面.jpg" alt="信封" class="envelope-img" id="envelope-image">
+                    </div>
+                    <p class="envelope-text">Click to view </p>
+                </div>
+                <div class="envelope-back">
+                    <div class="envelope-content" id="envelope-content">
+                        <h2>🐕</h2>
+                        <p>Check it</p>
+                        <!-- 信封内容图片将在这里显示 -->
+                        <img src="信.jpg" alt="星露谷图片" class="envelope-content-image" id="content-image">
+                    </div>
+                </div>
+            </div>
+            <div class="close-envelope" id="close-envelope">X</div>
+        </div>
+        
+        <!-- 图片弹出模态框 -->
+        <div class="modal" id="image-modal">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <img class="modal-content" id="modal-image">
+        </div>
+       
+        <footer>
+            <p>羊毛卷粗糙滥制坊 © 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        // 开场动画功能
+        const openingAnimation = document.getElementById('opening-animation');
+        const startButton = document.getElementById('start-button');
+        const envelopeContainer = document.querySelector('.envelope-container');
+        const musicPlayer = document.querySelector('.music-player');
+        
+        // 信封元素
+        const envelope = document.getElementById('envelope');
+        const envelopeImage = document.getElementById('envelope-image');
+        const contentImage = document.getElementById('content-image');
+        const closeEnvelope = document.getElementById('close-envelope');
+        
+        
+        // 模态框元素
+        const imageModal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        const closeModal = document.getElementById('close-modal');
+        
+        // 音乐控制功能
+        const musicToggle = document.getElementById('music-toggle');
+        const backgroundMusic = document.getElementById('background-music');
+        let musicPlaying = false;
+        
+        // 点击开始按钮后隐藏开场动画，显示主要内容
+        startButton.addEventListener('click', function() {
+    openingAnimation.style.display = 'none';
+    envelopeContainer.style.display = 'block';
+    musicPlayer.style.display = 'block';
+    
+    // 确保音乐在用户交互后播放
+    const playPromise = backgroundMusic.play();
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            musicPlaying = true;
+            musicToggle.style.backgroundColor = '#71aa34';
+        }).catch(error => {
+            // 如果自动播放失败，设置一个标记让用户稍后可以手动播放
+            console.log('自动播放失败:', error);
+            musicPlaying = false;
+            musicToggle.style.backgroundColor = '#888888';
+        });
+    }
+});
+
+// 在页面加载时添加用户交互检测
+document.addEventListener('click', function() {
+    if (!musicPlaying && backgroundMusic.paused) {
+        const playPromise = backgroundMusic.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                musicPlaying = true;
+                musicToggle.style.backgroundColor = '#71aa34';
+            });
+        }
+    }
+}, { once: true }); // 只执行一次
+        
+        // 信封交互功能
+        envelope.addEventListener('click', () => {
+            envelope.classList.add('open');
+        });
+
+        // 关闭信封
+        closeEnvelope.addEventListener('click', (e) => {
+            e.stopPropagation();
+            envelope.classList.remove('open');
+        });
+        
+       
+        
+        // 点击内容图片显示大图
+        contentImage.addEventListener('click', function() {
+            modalImage.src = this.src;
+            imageModal.style.display = 'flex';
+        });
+        
+           
+
+        // 关闭模态框
+        closeModal.addEventListener('click', function() {
+            imageModal.style.display = 'none';
+        });
+        
+        // 点击模态框背景关闭
+        imageModal.addEventListener('click', function(e) {
+            if (e.target === imageModal) {
+                imageModal.style.display = 'none';
+            }
+        });
+        
+        // 音乐控制
+        musicToggle.addEventListener('click', () => {
+            if (musicPlaying) {
+                backgroundMusic.pause();
+                musicToggle.style.backgroundColor = '#888888';
+                musicPlaying = false;
+            } else {
+                backgroundMusic.play();
+                musicToggle.style.backgroundColor = '#71aa34';
+                musicPlaying = true;
+            }
+            // 保存音乐播放状态
+            localStorage.setItem('musicPlaying', musicPlaying);
+        });
+        
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            // 加载保存的背景图片
+            const savedBackground = localStorage.getItem('savedBackground');
+            if (savedBackground) {
+                document.getElementById('background-container').style.backgroundImage = `url(${savedBackground})`;
+            }
+            
+           // 加载保存的信封图片
+const savedEnvelopeImage = localStorage.getItem('envelopeImage');
+if (savedEnvelopeImage) {
+    envelopeImage.src = savedEnvelopeImage;
+    // 不要修改contentImage.src，保持它原来的值
+    // contentImage.src = savedEnvelopeImage; // 删除或注释掉这行
+}
+            
+            // 加载音乐播放状态
+            const savedMusicState = localStorage.getItem('musicPlaying');
+            if (savedMusicState === 'true') {
+                // 尝试播放音乐
+                const playPromise = backgroundMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        musicPlaying = true;
+                        musicToggle.style.backgroundColor = '#71aa34';
+                    }).catch(error => {
+                        console.log('自动播放失败:', error);
+                        musicPlaying = false;
+                        musicToggle.style.backgroundColor = '#888888';
+                    });
+                }
+            }
+            
+            // 设置信封图片居中显示
+            envelopeImage.style.display = 'block';
+            envelopeImage.style.margin = '0 auto';
+        });
+    </script>
+</body>
+</html>
